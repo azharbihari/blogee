@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block head %}
+<nav aria-label="breadcrumb" class="my-5">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'post-list' %}">Posts</a></li>
+        <li class="breadcrumb-item">{{ post.title }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<h5 class="display-5 fw-bold">{{ post.title }}</h5>
+<p><small class="text-body-secondary">{{ post.created_at | naturaltime}}</small> by {{ post.author }}</p>
+<hr class="">
+<div class="">
+    {{ post.content | safe }}
+</div>
+
+<hr class="my-5">
+<div class="">
+    <h6 class="lead">Leave a Comment</h6>
+    <form method="post" action="{% url 'comment-add' slug=post.slug %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <textarea name="content" id="id_content" class="form-control" rows="4"
+                placeholder="Write your comment here..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-secondary btn-sm">Submit</button>
+    </form>
+</div>
+
+<hr class="my-5">
+
+<div class="">
+    <h6 class="lead">Comments</h6>
+    <div class="row row-cols-1 row-cols-md-2 g-1">
+        {% for comment in post.comment_set.all %}
+        <div class="col-sm">
+            <div class="card">
+                <div class="card-body">
+                    <div class="hstack">
+                        <div>
+                            <strong>{{ comment.user.get_full_name }}</strong> ·
+                            <small>{{ comment.created_at |naturaltime}}</small>
+                        </div>
+                        {% if request.user.is_authenticated and request.user == comment.user %}
+                        <div class="ms-auto">
+                            <a class="link-warning text-decoration-none" href="{% url 'comment-edit' pk=comment.pk %}"
+                                role="button">Edit</a>
+                            <a class="link-danger text-decoration-none" href="{% url 'comment-delete' pk=comment.pk %}"
+                                role="button">Delete</a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <p class="card-text">{{ comment.content }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No comments yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block sidebar %}
+
+{% if previous_post %}
+<div class="">
+    <p class="lead mb-1">Previous Post</p>
+    <a href="{% url 'post-detail' slug=previous_post.slug %}" class="text-decoration-none"> {{ previous_post.title}}</a>
+</div>
+{% endif %}
+{% if next_post %}
+<div class="mt-4">
+    <p class="lead mb-1">Next Post</p>
+    <a href="{% url 'post-detail' slug=next_post.slug %}" class="text-decoration-none">{{ next_post.title }}</a>
+</div>
+{% endif %}
+<hr>
+<p class="lead">Categories</p>
+<ul class="list-inline">
+    {% for category in category_list %}
+    <li class="list-inline-item">
+        <a href="{% url 'category-detail' slug=category.slug %}" class="link-primary text-decoration-none">
+            {{ category.name }}
+        </a>
+        <span class="badge bg-primary rounded-pill">{{ category.post_set.count }}</span>
+    </li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<p class="lead">Archives</p>
+<ul class="list-inline">
+    {% for archive in archive_list %}
+    <li class="list-inline-item">
+        <a href="{% url 'post-month-archive' year=archive.year|date:'Y' month=archive.month|date:'b' %}"
+            class="link-primary text-decoration-none">
+            {{ archive.month|date:"F Y" }}
+        </a> <span class="badge bg-primary rounded-pill">{{ archive.count }}</span>
+    </li>
+    {% endfor %}
+</ul>
+
+
+{% endblock %}

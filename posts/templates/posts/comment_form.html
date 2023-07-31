@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+<h6 class="lead my-5">Edit Comment</h6>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <textarea name="content" id="id_content" class="form-control" rows="4" placeholder="Write your comment here..."
+            required>{{ comment.content }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-secondary btn-sm">Update</button>
+</form>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+
+{% block head %}
+<h1 class="display-4 my-5"> All Posts</h1>
+{% endblock %}
+
+{% block content %}
+<div class="row row-cols-1 row-cols-md-3 g-2">
+    {% for post in post_list %}
+    <div class="col">
+        <div class="card">
+            <img src="{{post.featured_image.url}}" class="card-img-top" alt="...">
+            <div class="card-body">
+                <div class="hstack gap-1">
+                    {% for category in post.categories.all %}
+                    <a href="{% url 'category-detail' slug=category.slug %}">
+                        <span class="badge rounded-pill text-bg-primary">{{ category.name }}</span></a>
+                    {% endfor %}
+                </div>
+                <h5 class="card-title">{{ post.title }}</h5>
+                <p class="card-text">
+                    <small class="text-body-secondary">{{ post.created_at | naturaltime}}</small>
+                </p>
+                <a href="{% url 'post-detail' slug=post.slug %}" class="text-decoration-none">Continue
+                    reading <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Sorry, no posts found.</p>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation example" class="mt-5">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+
+{% block sidebar %}
+<p class="lead">Categories</p>
+<ul class="list-inline">
+    {% for category in category_list %}
+    <li class="list-inline-item">
+        <a href="{% url 'category-detail' slug=category.slug %}" class="link-primary text-decoration-none">
+            {{ category.name }}
+        </a>
+        <span class="badge bg-primary rounded-pill">{{ category.post_set.count }}</span>
+    </li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<p class="lead">Archives</p>
+<ul class="list-inline">
+    {% for archive in archive_list %}
+    <li class="list-inline-item">
+        <a href="{% url 'post-month-archive' year=archive.year|date:'Y' month=archive.month|date:'b' %}"
+            class="link-primary text-decoration-none">
+            {{ archive.month|date:"F Y" }}
+        </a> <span class="badge bg-primary rounded-pill">{{ archive.count }}</span>
+    </li>
+    {% endfor %}
+</ul>
+
+
+{% endblock %}
